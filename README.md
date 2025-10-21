@@ -18,3 +18,12 @@ Go短链生成服务，Go + Gin + GORM + SQLite（单文件，方便演示和快
     curl -X POST -H "Content-Type: application/json" -d '{"url":"https://example.com/very/long/link"}' http://localhost:8080/api/shorten
  4. 或者自定义短码：
     curl -X POST -H "Content-Type: application/json" -d '{"url":"https://example.com","custom":"go123"}' http://localhost:8080/api/shorten
+
+## 不同长度下的容量对比
+|  短码长度 |        可生成数量（Base62）        |      约等于     |
+| :---: | :-------------------------: | :----------: |
+|   4   |       62⁴ = 14,776,336      |   约 1,477 万  |
+|   5   |      62⁵ = 916,132,832      |    约 9.1 亿   |
+|   6   |     62⁶ = 56,800,235,584    |    约 568 亿   |
+| **7** | **62⁷ = 3,521,614,606,208** | **约 3.5 万亿** |
+|   8   |  62⁸ = 218,340,105,584,896  |   约 218 万亿   |
