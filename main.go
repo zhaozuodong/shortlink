@@ -91,10 +91,13 @@ func main() {
 	initDB()
 
 	// 路由
-	r.POST("/api/shorten", handleCreate)
-	r.GET("/api/info/:code", handleInfo)
-	r.DELETE("/api/:code", handleDelete)
-
+	// 需要 token 的接口
+	api := r.Group("/api", tokenAuthMiddleware())
+	{
+		api.POST("/shorten", handleCreate)
+		api.GET("/info/:code", handleInfo)
+		api.DELETE("/:code", handleDelete)
+	}
 	// 重定向（放在路由末尾以避免冲突）
 	r.GET("/:code", handleRedirect)
 
@@ -116,6 +119,29 @@ func initDB() {
 	err = db.AutoMigrate(&ShortLink{})
 	if err != nil {
 		log.Fatal("数据库迁移失败：", err)
+	}
+}
+
+// ----------------- Token 验证中间件 -----------------
+func tokenAuthMiddleware() gin.HandlerFunc {
+	token := os.Getenv("API_TOKEN")
+	if token == "" {
+		log.Fatal("请设置环境变量 API_TOKEN")
+	}
+	return func(c *gin.Context) {
+		authHeader := c.GetHeader("Authorization")
+		if !strings.HasPrefix(authHeader, "Bearer ") {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "缺少或无效的 Authorization header"})
+			c.Abort()
+			return
+		}
+		providedToken := strings.TrimPrefix(authHeader, "Bearer ")
+		if providedToken != token {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "无效 token"})
+			c.Abort()
+			return
+		}
+		c.Next()
 	}
 }
 
