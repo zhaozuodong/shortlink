@@ -1,0 +1,15 @@
+version: '3.9'
+
+services:
+  shortlink:
+    build: .
+    container_name: shortlink
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      PORT: 8080
+      API_TOKEN: "MySecretToken123"       # 访问 API 的 token
+      SHORT_DOMAIN: "https://s.example.com"  # 生成短链的域名
+    volumes:
+      - ./data:/app/data   # 持久化 SQLite 数据库
